@@ -28,6 +28,19 @@ class App extends Component {
     this.setState({airportSelection: airportCode})
   }
 
+  rowsIncludeAirline(id, rows){
+    return rows.filter((row) => {
+      return row.airline === id;
+    }).length === 0;
+  }
+
+  rowsIncludeAirport(code, rows){
+    return rows.filter((row) => {
+      return row.dest === code ||
+             row.src === code;
+    }).length === 0;
+  }
+
   clearFilters = (e) => {
     e.preventDefault();
     this.setState({airportSelection: 'all',
@@ -58,6 +71,7 @@ class App extends Component {
 
 
   render() {
+    const rows = this.setRows();
     const perPage = 25;
     const columns = [
       {name: "Airline", property: 'airline'},
@@ -67,16 +81,16 @@ class App extends Component {
 
     const airlines = DATA.airlines.map((airline) => {
       return(
-        <option value={airline.id}>{airline.name}</option>
+        <option value={airline.id} disabled={this.rowsIncludeAirline(airline.id, rows)}>{airline.name}</option>
       )
     });
 
     const airports = DATA.airports.map((airport) => {
       return (
-        <option value={airport.code}>{airport.name}</option>
+        <option value={airport.code} disabled={this.rowsIncludeAirport(airport.code, rows)}>{airport.name}</option>
       )
     })
-    const rows = this.setRows();
+
     return (
       <div className="app">
         <header className="header">
