@@ -4,6 +4,12 @@ import DATA from './data.js';
 
 class App extends Component {
 
+  constructor() {
+    super();
+    this.state = {
+      selection: 'all'
+    }
+  }
 
   formatValue(property, value){
     if (property==='airline'){
@@ -13,7 +19,20 @@ class App extends Component {
     }
   }
 
+  handleFilterSelect = (airlineCode) => {
+    this.setState({selection: airlineCode});
+  };
 
+
+  setRows() {
+    if (this.state.selection === 'all'){
+      return DATA.routes
+    } else {
+      return DATA.routes.filter((route) => {
+        return route.airline === +this.state.selection
+      })
+    }
+  }
 
 
   render() {
@@ -23,12 +42,22 @@ class App extends Component {
       {name: "Source Airport", property: 'src'},
       {name: "Destination Airport", property: 'dest'}
     ];
-    const rows = DATA.routes;
+
+    const airlines = DATA.airlines.map((airline) => {
+      return(
+        <option value={airline.id}>{airline.name}</option>
+      )
+    });
+    const rows = this.setRows();
     return (
       <div className="app">
         <header className="header">
           <h1 className="title">Airline Routes</h1>
         </header>
+        <Select
+          airlines={airlines}
+          handleFilterSelect={this.handleFilterSelect}
+        />
         <section>
           <RoutesTable
             perPage={perPage}
@@ -111,6 +140,23 @@ class RoutesTable extends Component {
     </div>
     )
   }
+}
+
+class Select extends Component {
+
+  handleFilterSelect = (e) => {
+    const airlineCode = e.target.value;
+    this.props.handleFilterSelect(airlineCode)
+  }
+  render() {
+    return(
+      <select onChange={this.handleFilterSelect}>
+        {this.props.airlines}
+      </select>
+    )
+  }
+
+
 }
 
 export default App;
