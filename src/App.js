@@ -7,7 +7,8 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      selection: 'all'
+      airlineSelection: 'all',
+      airportSelection: 'all',
     }
   }
 
@@ -19,17 +20,38 @@ class App extends Component {
     }
   }
 
-  handleFilterSelect = (airlineCode) => {
-    this.setState({selection: airlineCode});
+  handleAirlineFilterSelect = (airlineCode) => {
+    this.setState({airlineSelection: airlineCode});
   };
+
+  handleAirportFilterSelect = (airportCode) => {
+    this.setState({airportSelection: airportCode})
+  }
+
+  clearFilters = (e) => {
+    e.preventDefault();
+    this.setState({airportSelection: 'all',
+                    airlineSelection: 'all'})
+  }
 
 
   setRows() {
-    if (this.state.selection === 'all'){
-      return DATA.routes
+    if (this.state.airlineSelection === 'all' && this.state.airportSelection === 'all'){
+      return DATA.routes;
+    } else if (this.state.airlineSelection !== 'all' && this.state.airportSelection !== 'all') {
+      return DATA.routes.filter((route) => {
+        return (route.airline === +this.state.airlineSelection &&
+                (route.src === this.state.airportSelection ||
+                route.dest === this.state.airportSelection))
+      })
+    } else if (this.state.airlineSelection !== 'all') {
+      return DATA.routes.filter((route) => {
+        return route.airline === +this.state.airlineSelection
+      })
     } else {
       return DATA.routes.filter((route) => {
-        return route.airline === +this.state.selection
+        return route.src === this.state.airportSelection ||
+                route.dest === this.state.airportSelection
       })
     }
   }
@@ -48,16 +70,27 @@ class App extends Component {
         <option value={airline.id}>{airline.name}</option>
       )
     });
+
+    const airports = DATA.airports.map((airport) => {
+      return (
+        <option value={airport.code}>{airport.name}</option>
+      )
+    })
     const rows = this.setRows();
     return (
       <div className="app">
         <header className="header">
           <h1 className="title">Airline Routes</h1>
         </header>
-        <Select
-          airlines={airlines}
-          handleFilterSelect={this.handleFilterSelect}
-        />
+        <div>
+          <Select
+            clear={this.clearFilters}
+            airports={airports}
+            airlines={airlines}
+            handleAirlineFilterSelect={this.handleAirlineFilterSelect}
+            handleAirportFilterSelect={this.handleAirportFilterSelect}
+          />
+        </div>
         <section>
           <RoutesTable
             perPage={perPage}
@@ -144,15 +177,34 @@ class RoutesTable extends Component {
 
 class Select extends Component {
 
-  handleFilterSelect = (e) => {
+  handleAirlineFilterSelect = (e) => {
     const airlineCode = e.target.value;
-    this.props.handleFilterSelect(airlineCode)
+    this.props.handleAirlineFilterSelect(airlineCode)
+  }
+
+  handleAirportFilterSelect = (e) => {
+    const airportCode = e.target.value;
+    this.props.handleAirportFilterSelect(airportCode);
   }
   render() {
     return(
-      <select onChange={this.handleFilterSelect}>
-        {this.props.airlines}
-      </select>
+    <div>
+      <span> Show routes on
+        <select onChange={this.handleAirlineFilterSelect}>
+          {this.props.airlines}
+        </select>
+      </span>
+      <span> Flying in or out of
+        <select onChange={this.handleAirportFilterSelect}>
+          {this.props.airports}
+        </select>
+      </span>
+      <span>
+        <button onClick={this.props.clear}>
+          Clear filters
+        </button>
+      </span>
+    </div>
     )
   }
 
