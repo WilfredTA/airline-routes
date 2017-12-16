@@ -116,7 +116,6 @@ class RoutesTable extends Component {
 
   nextPage = (event) => {
       event.preventDefault();
-      console.log('next clicked')
       this.setState(function(prevState){
         return {page: prevState.page + 1};
       });
@@ -161,7 +160,7 @@ class RoutesTable extends Component {
             {rows}
           </tbody>
         </table>
-      <div>  Showing {start + 1} - {start+25} of {this.props.rows.length} routes</div>
+      <div>  Showing {start + 1} - {this.props.rows.length < 25 ? this.props.rows.length : 25} of {this.props.rows.length} routes</div>
       <div className="pagination">
         <button disabled={this.state.page === 0} onClick={this.prevPage}>
           Previous
@@ -191,11 +190,13 @@ class Select extends Component {
     <div>
       <span> Show routes on
         <select onChange={this.handleAirlineFilterSelect}>
+        <option value="all">All airlines</option>
           {this.props.airlines}
         </select>
       </span>
       <span> Flying in or out of
         <select onChange={this.handleAirportFilterSelect}>
+        <option value="all">All airports</option>
           {this.props.airports}
         </select>
       </span>
